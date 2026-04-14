@@ -1,0 +1,40 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: devops-app-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: devops-app.rules
+      rules:
+        - alert: DevopsAppDown
+          expr: up{job="devops-app"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: "devops-app is down"
+            description: "The devops-app pod has been unreachable for 2 minutes."
+
+        - alert: DevopsAppHighErrorRate
+          expr: |
+            sum(rate(flask_http_request_total{status=~"5.."}[5m]))
+              /
+            sum(rate(flask_http_request_total[5m])) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "High 5xx error rate on devops-app"
+            description: "More than 5% of requests returned 5xx in the last 5 minutes."
+
+        - alert: PodRestartingFrequently
+          expr: increase(kube_pod_container_status_restarts_total{namespace="default"}[15m]) > 3
+          for: 5m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod {{ $labels.pod }} restarting frequently"
+            description: "Pod has restarted more than 3 times in 15 minutes."
