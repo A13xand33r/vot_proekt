@@ -29,16 +29,20 @@ jobs:
         run: pytest tests/ -v
 
       - name: Notify Discord on success
-        if: success()
+        if: success() && env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+          curl -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{"content": "CI tests passed on ${{ github.ref_name }} by ${{ github.actor }}"}'
 
       - name: Notify Discord on failure
-        if: failure()
+        if: failure() && env.DISCORD_WEBHOOK != ''
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          curl -X POST "${{ secrets.DISCORD_WEBHOOK }}" \
+          curl -X POST "$DISCORD_WEBHOOK" \
             -H "Content-Type: application/json" \
             -d '{"content": "CI tests FAILED on ${{ github.ref_name }} by ${{ github.actor }}"}'
 
