@@ -3,17 +3,12 @@ kind: Application
 metadata:
   name: devops-app
   namespace: argocd
-  finalizers:
-    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
     repoURL: https://github.com/A13xand33r/vot_proekt
     targetRevision: HEAD
     path: k8s
-    directory:
-      recurse: false
-      include: "{deployment.yaml,service.yaml}"
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -21,12 +16,3 @@ spec:
     automated:
       prune: true
       selfHeal: true
-    syncOptions:
-      - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
-    retry:
-      limit: 5
-      backoff:
-        duration: 5s
-        factor: 2
-        maxDuration: 3m

@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: devops-app
-  namespace: default
-  labels:
-    app: devops-app
 spec:
   replicas: 2
   selector:
@@ -14,15 +11,10 @@ spec:
     metadata:
       labels:
         app: devops-app
-      annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "5000"
-        prometheus.io/path: "/metrics"
     spec:
       containers:
         - name: devops-app
           image: alexander75977/devops-app:latest
-          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:
