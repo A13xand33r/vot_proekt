@@ -22,7 +22,6 @@ resource "kubernetes_deployment" "app" {
   metadata {
     name      = "devops-app"
     namespace = kubernetes_namespace.app.metadata[0].name
-    labels    = { app = "devops-app" }
   }
 
   spec {
@@ -42,14 +41,6 @@ resource "kubernetes_deployment" "app" {
           image = "${var.image_repo}:${var.image_tag}"
           port {
             container_port = 5000
-          }
-          liveness_probe {
-            http_get {
-              path = "/health"
-              port = 5000
-            }
-            initial_delay_seconds = 10
-            period_seconds        = 15
           }
         }
       }
