@@ -1,141 +1,74 @@
 # DevOps Todo App
 
-Уеб базирано Todo приложение, демонстриращо пълен CI/CD pipeline с Kubernetes оркестрация, Infrastructure as Code и observability stack.
+Просто todo приложение с Flask, контейнеризирано с Docker и деплойнато в Kubernetes чрез ArgoCD. Включва CI/CD pipeline, monitoring и IaC.
 
-## Какъв проблем решава
-
-Проектът показва end-to-end DevOps практика: от локален код през автоматизирано тестване, билдване на Docker имидж, публикуване в Docker Hub, GitOps деплой с ArgoCD към Kubernetes клъстер, до мониторинг и алертинг. Приложението само по себе си е прост Flask REST API за управление на задачи (tasks).
-
-## Архитектурна диаграма
+## Архитектура
 
 ![Architecture](docs/architecture.png)
 
-Високо ниво на flow-а:
-
 ```
-Developer -> Git push -> GitHub -> GitHub Actions (lint + pytest)
-                                -> Docker build -> Docker Hub
-ArgoCD  <- watches repo  <- k8s/ manifests
-ArgoCD  -> kubectl apply -> Kubernetes (minikube)
-Prometheus/Grafana/Loki scrape metrics + logs -> Alertmanager -> Discord webhook
+Developer -> GitHub -> GitHub Actions (test + build) -> Docker Hub
+ArgoCD -> sync k8s/ -> Kubernetes (minikube)
+Prometheus + Grafana + Loki -> Alertmanager -> Discord
 ```
 
 ## Технологии
 
-| Технология | Версия | Цел |
-|---|---|---|
-| Python / Flask | 3.11 / 3.0 | Web приложение |
-| prometheus-flask-exporter | 0.23 | Експорт на метрики |
-| Docker | 24.x | Контейнеризация |
-| Kubernetes (minikube) | 1.28+ | Оркестрация |
-| GitHub Actions | - | CI Pipeline |
-| ArgoCD | 2.9 | CD (GitOps) |
-| Terraform | >= 1.6 | Infrastructure as Code |
-| Prometheus + Grafana | kube-prometheus-stack | Метрики и дашбордове |
-| Loki | 2.9 | Агрегиране на логове |
-| Alertmanager | - | Алерти към Discord |
-| pre-commit + gitleaks | 3.6 / 8.18 | Сигурност при коммит |
+- Python 3.11 / Flask 3.0
+- Docker
+- Kubernetes (minikube)
+- GitHub Actions (CI)
+- ArgoCD (CD)
+- Terraform (IaC)
+- Prometheus, Grafana, Loki (monitoring)
+- pre-commit + gitleaks
 
 ## Стартиране
 
-### Локално с Python
-
 ```bash
+# локално
 pip install -r app/requirements.txt
 python app/app.py
-# -> http://localhost:5000/health
-```
 
-### С Docker
-
-```bash
+# docker
 docker build -t devops-app .
 docker run -p 5000:5000 devops-app
-```
 
-### С Kubernetes (minikube)
-
-```bash
-minikube start --cpus=4 --memory=4096
-kubectl apply -f k8s/deployment.yaml
-kubectl apply -f k8s/service.yaml
+# kubernetes
+minikube start
+kubectl create secret generic app-secrets --from-literal=secret-key=mysecret
+kubectl apply -f k8s/deployment.yaml -f k8s/service.yaml
 minikube service devops-app-service
-```
 
-### С Terraform (IaC)
+# terraform
+cd terraform && terraform init && terraform apply
 
-```bash
-cd terraform
-terraform init
-terraform apply -auto-approve
-```
-
-### ArgoCD (GitOps CD)
-
-```bash
-kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-kubectl apply -f k8s/argocd-app.yaml
-```
-
-### Monitoring stack
-
-```bash
+# monitoring
 bash monitoring/install.sh
-# Grafana -> minikube service -n monitoring monitoring-grafana
 ```
 
-## API endpoints
+## API
 
-| Метод | Път | Описание |
-|---|---|---|
-| GET | `/health` | Health check |
-| GET | `/tasks` | Списък със задачи |
-| POST | `/tasks` | Добавя задача `{"title": "..."}` |
-| DELETE | `/tasks/<id>` | Изтрива задача |
-| GET | `/metrics` | Prometheus метрики |
+- `GET /health` - healthcheck
+- `GET /tasks` - всички задачи
+- `POST /tasks` - нова задача (`{"title": "..."}`)
+- `DELETE /tasks/<id>` - изтриване
+- `GET /metrics` - prometheus метрики
 
-## Структура на проекта
+## Структура
 
 ```
-vot_proekt/
-├── app/                    # Flask приложение
-│   ├── app.py              # REST API
-│   └── requirements.txt
-├── tests/                  # Pytest тестове
-│   └── test_app.py
-├── k8s/                    # Kubernetes манифести
-│   ├── deployment.yaml
-│   ├── service.yaml
-│   ├── secret.example.yaml
-│   └── argocd-app.yaml
-├── terraform/              # Infrastructure as Code
-│   ├── main.tf
-│   ├── variables.tf
-│   └── outputs.tf
-├── monitoring/             # Observability stack
-│   ├── prometheus-values.yaml
-│   └── install.sh
-├── .github/workflows/      # CI Pipeline
-│   └── ci.yml
-├── docs/                   # Диаграми и документация
-│   └── architecture.md
-├── Dockerfile
-├── .pre-commit-config.yaml
-├── .gitignore
-└── README.md
+├── app/                 # приложение
+├── tests/               # тестове
+├── k8s/                 # kubernetes manifests
+├── terraform/           # IaC
+├── monitoring/          # prometheus/grafana/loki
+├── .github/workflows/   # CI pipeline
+├── docs/                # документация
+└── Dockerfile
 ```
-
-## Pre-commit hooks
-
-```bash
-pip install pre-commit
-pre-commit install
-```
-
-Hooks: `gitleaks` (скрива пароли), `black` (форматиране), `flake8` (линтинг), `detect-private-key`, `trailing-whitespace`, `check-yaml`.
 
 ## Автори
 
-- Ivan Genov ([@ivan-genov](https://github.com/ivan-genov))
-- Alexander Asenov ([@A13xand33r](https://github.com/A13xand33r))
+- Ivan Genov
+- Alexander Asenov

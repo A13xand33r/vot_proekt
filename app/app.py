@@ -6,19 +6,16 @@ app = Flask(__name__)
 metrics = PrometheusMetrics(app)
 logging.basicConfig(level=logging.INFO)
 
-metrics.info("app_info", "DevOps Todo App", version="1.0.0")
-
 tasks = []
 
 
-@app.route("/health", methods=["GET"])
+@app.route("/health")
 def health():
     return jsonify({"status": "ok"})
 
 
 @app.route("/tasks", methods=["GET"])
 def get_tasks():
-    app.logger.info("GET /tasks called")
     return jsonify(tasks)
 
 
