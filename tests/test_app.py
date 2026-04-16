@@ -3,7 +3,7 @@ import os
 import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "app"))
-from app import app
+from app import app  # noqa: E402
 
 
 @pytest.fixture
