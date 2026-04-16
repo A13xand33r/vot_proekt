@@ -3,36 +3,20 @@ grafana:
   adminPassword: "admin123"
   service:
     type: NodePort
-  defaultDashboardsEnabled: true
-  sidecar:
-    dashboards:
-      enabled: true
 
 prometheus:
   service:
     type: NodePort
   prometheusSpec:
-    serviceMonitorSelectorNilUsesHelmValues: false
-    podMonitorSelectorNilUsesHelmValues: false
     retention: 7d
-    resources:
-      requests:
-        memory: 400Mi
 
 alertmanager:
   service:
     type: NodePort
   config:
-    global:
-      resolve_timeout: 5m
     route:
-      group_by: ["alertname"]
-      group_wait: 10s
-      group_interval: 10s
-      repeat_interval: 1h
       receiver: discord
     receivers:
       - name: discord
         webhook_configs:
           - url: "REPLACE_WITH_DISCORD_WEBHOOK_URL"
-            send_resolved: true
