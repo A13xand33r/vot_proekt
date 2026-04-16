@@ -19,4 +19,4 @@ alertmanager:
     receivers:
       - name: discord
         webhook_configs:
-          - url: "REPLACE_WITH_DISCORD_WEBHOOK_URL"
+          - url: "https://discord.com/api/webhooks/1494365933014089849/YL6Ca9xKIS6cNuDWzOkj1Q_7-4YxxvWNWM3Op8jeXH7vqc3_XE--kHbUcLsHtWqeSAM-"
